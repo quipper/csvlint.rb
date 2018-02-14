@@ -38,13 +38,18 @@ module Csvlint
         ESCAPE_RE[@re_chars][@re_esc][str]
       end
 
-      # Optimization: Disable the CSV library's converters feature.
-      # @see https://github.com/ruby/ruby/blob/v2_2_3/lib/csv.rb#L2100
-      def init_converters(options, field_name = :converters)
-        @converters = []
-        @header_converters = []
-        options.delete(:unconverted_fields)
-        options.delete(field_name)
+      # This monkey patch is not compatible anymore when ruby 2.5 is introduced
+      # - https://docs.ruby-lang.org/en/2.4.0/CSV.html#method-i-encode_re
+      # - https://docs.ruby-lang.org/en/2.5.0/CSV.html#method-i-encode_re
+      if RUBY_VERSION < '2.5'
+        # Optimization: Disable the CSV library's converters feature.
+        # @see https://github.com/ruby/ruby/blob/v2_2_3/lib/csv.rb#L2100
+        def init_converters(options, field_name = :converters)
+          @converters = []
+          @header_converters = []
+          options.delete(:unconverted_fields)
+          options.delete(field_name)
+        end
       end
     end
 
